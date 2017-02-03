@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action='/add' method='post'>
+    <label>
+        I want to add:
+        <input type="text" name="add"/>
+    </label>
+    <input type="submit" value="Add&nbsp;It!"/>
+</form>
+<br>
+<form action='/cross-off' method='post'>
+    <label>
+        I want to cross off:
+        <select name="cross-off">
+{% endblock %}
