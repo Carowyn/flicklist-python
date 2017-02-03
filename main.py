@@ -34,7 +34,6 @@ terrible_movies = [
     "Nine Lives"
 ]
 
-
 def getCurrentWatchlist():
     """ Returns the user's current watchlist """
 
@@ -86,8 +85,13 @@ class Index(webapp2.RequestHandler):
         error = self.request.get("error")
         error_element = "<p class='error'>" + error + "</p>" if error else ""
 
+        nomovie = self.request.get("nomovie")
+        nomovie_element = "<p class='error'>" + nomovie + "</p>"
+
+        terrible_error = self.request.get("terrible")
+        terrible_error_element = "<p class='error'>" + terrible_error + "</p>"
         # combine all the pieces to build the content of our response
-        main_content = edit_header + add_form + crossoff_form + error_element
+        main_content = edit_header + add_form + terrible_error_element + nomovie_element + crossoff_form + error_element
         content = page_header + main_content + page_footer
         self.response.write(content)
 
@@ -103,17 +107,24 @@ class AddMovie(webapp2.RequestHandler):
 
         # TODO 2
         # if the user typed nothing at all, redirect and yell at them
+        if new_movie == "" or new_movie == " ":
+            nomovie = "Please enter the name of the movie you want to watch.".format(new_movie)
+            nomovie_escaped = cgi.escape(nomovie, quote=True)
 
+            self.redirect("/?nomovie=" + nomovie_escaped)
 
         # TODO 3
         # if the user wants to add a terrible movie, redirect and yell at them
+        if new_movie in terrible_movies:
+            terrible_error = "{0} sucks! You really don't want to watch it.".format(new_movie)
 
+            self.redirect("/?terrible=" + terrible_error)
 
         # TODO 1
         # 'escape' the user's input so that if they typed HTML, it doesn't mess up our site
 
         # build response content
-        new_movie_element = "<strong>" + new_movie + "</strong>"
+        new_movie_element = "<strong>" + cgi.escape(new_movie, quote=True) + "</strong>"
         sentence = new_movie_element + " has been added to your Watchlist!"
         content = page_header + "<p>" + sentence + "</p>" + page_footer
         self.response.write(content)
