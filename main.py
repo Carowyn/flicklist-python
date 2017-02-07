@@ -13,6 +13,7 @@ terrible_movies = [
     "Star Wars Episode 1: Attack of the Clones",
     "Paul Blart: Mall Cop 2",
     "Nine Lives"
+    "Sideways"
 ]
 
 
@@ -108,7 +109,12 @@ class MovieRatings(webapp2.RequestHandler):
     # TODO 2
     # implement a post method inside this class
     # it should render the rating-confirmation.html template
-
+    def post(self):
+        movie = self.request.get("movie")
+        rating = self.request.get("rating")
+        tem = jinja_env.get_template("rating-confirmation.html")
+        content = tem.render(movie=movie, rating=rating)
+        self.response.write(content)
 
 
 # TODO 1
