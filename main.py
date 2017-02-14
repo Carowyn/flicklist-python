@@ -51,7 +51,7 @@ class Handler(webapp2.RequestHandler):
         user_id = user.key().id()
         self.set_secure_cookie('user_id', str(user_id))
 
-    def logout_user(self, user):
+    def logout_user(self):
         self.set_secure_cookie('user_id', "")
 
     def set_secure_cookie(self, name, val):
@@ -63,6 +63,18 @@ class Handler(webapp2.RequestHandler):
         if cookie_val:
             return hashutils.check_secure_val(cookie_val)
 
+    def get_user_by_name(self, username):
+        user = db.GqlQuery("SELECT * FROM User WHERE username = '%s' " % username)
+        if user:
+            return user.get()
+
+    def initialize(self, *args, **kwargs):
+        webapp2.RequestHandler.initialize(self, *args, **kwargs)
+        uid = self.read_secure_cookie('user_id')
+        self.user = uid and User.get_by_id(int(uid))
+
+        if not self.user and self.request.path not in allowed_routes:
+            self.redirect('login')
 
 class Index(Handler):
     """ Handles requests coming in to '/' (the root of our site)
@@ -162,15 +174,31 @@ class MovieRatings(Handler):
             self.renderError(400)
 
 class Login(Handler):
+    def render_login_form(self, error=""):
+        t = jinja_env.get_template("login.html")
+        content = t.render(error=error)
+        self.response.write(content)
+
     def get(self):
-        self.response.write('login GET')
+        self.render_login_form()
 
     def post(self):
-        self.response.write('login POST')
+        submitted_username = self.request.get("username")
+        submitted_password = self.request.get("password")
+
+        user = self.get_user_by_name(submitted_username)
+        if not user:
+            self.render_login_form(error="Invalid Username.")
+        elif not hashutils.valid_pw(submitted_username, submitted_password, user.pw_hash):
+            self.render_login_form(error="Invalid Password.")
+        else:
+            self.login_user(user)
+            self.redirect("/")
 
 class Logout(Handler):
     def get(self):
-        self.response.write('logout GET')
+        self.logout_user()
+        self.redirect('/login')
 
 class Register(Handler):
     def validate_username(self, username):
