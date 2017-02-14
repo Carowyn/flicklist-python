@@ -134,10 +134,31 @@ class MovieRatings(Handler):
         else:
             self.renderError(400)
 
+class Login(Handler):
+    def get(self):
+        self.response.write('login GET')
+
+    def post(self):
+        self.response.write('login POST')
+
+class Logout(Handler):
+    def get(self):
+        self.response.write('logout GET')
+
+class Register(Handler):
+    def get(self):
+        self.response.write('register GET')
+
+    def post(self):
+        self.response.write('register POST')
+        
 
 app = webapp2.WSGIApplication([
     ('/', Index),
     ('/add', AddMovie),
     ('/watched-it', WatchedMovie),
-    ('/ratings', MovieRatings)
+    ('/ratings', MovieRatings),
+    ('/login', Login),
+    ('/logout', Logout),
+    ('/register', Register)
 ], debug=True)
